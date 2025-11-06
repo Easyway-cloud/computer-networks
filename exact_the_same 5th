@@ -1,0 +1,76 @@
+Program- 9
+
+
+RSA is an example of public key cryptography. It was developed by Rivest, Shamir and Adelman. The RSA algorithm can be used for both public key encryption and digital signatures. Its security is based on the difficulty of factoring large integers.
+
+
+Source Code:
+
+import java.io.DataInputStream; import java.io.IOException; import java.math.BigInteger;
+import java.util.Random; public class RSA
+{
+private BigInteger p,q,N,phi,e,d; private int bitlength=1024; private Random r;
+public RSA()
+{
+r=new Random(); p=BigInteger.probablePrime(bitlength,r); q=BigInteger.probablePrime(bitlength,r); System.out.println("Prime number p is"+p); System.out.println("prime number q is"+q); N=p.multiply(q);
+phi=p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE)); e=BigInteger.probablePrime(bitlength/2,r); while(phi.gcd(e).compareTo(BigInteger.ONE)>0&&e.compareTo(phi)<0)
+{
+e.add(BigInteger.ONE);
+}
+System.out.println("Public key is"+e); d=e.modInverse(phi); System.out.println("Private key is"+d);
+}
+public RSA(BigInteger e,BigInteger d,BigInteger N)
+{
+this.e=e;
+
+this.d=d; this.N=N;
+}
+public static void main(String[] args)throws IOException
+{
+RSA rsa=new RSA();
+DataInputStream in=new DataInputStream(System.in); String testString;
+System.out.println("Enter the plain text:"); testString=in.readLine(); System.out.println("Encrypting string:"+testString);
+System.out.println("string in bytes:"+bytesToString(testString.getBytes())); byte[] encrypted=rsa.encrypt(testString.getBytes());
+byte[] decrypted=rsa.decrypt(encrypted); System.out.println("Dcrypting Bytes:"+bytesToString(decrypted)); System.out.println("Dcrypted string:"+new String(decrypted));
+}
+private static String bytesToString(byte[] encrypted)
+{
+String test=" "; for(byte b:encrypted)
+{
+test+=Byte.toString(b);
+}
+return test;
+}
+public byte[]encrypt(byte[]message)
+{
+return(new BigInteger(message)).modPow(e,N).toByteArray();
+}
+
+public byte[]decrypt(byte[]message)
+{
+return(new BigInteger(message)).modPow(d,N).toByteArray();
+}
+}
+
+
+OUTPUT
+user@user-OptiPlex-3050:~/Desktop$ javac RSA.java
+Note: RSA.java uses or overrides a deprecated API. Note: Recompile with -Xlint:deprecation for details. user@user-OptiPlex-3050:~/Desktop$ java RSA Prime number p
+is94340415559667604196396997194355500620617261892363799333186130581555030559022258412648913166938447749 396172942836509622095538500548337654390771331149455795514743327288673267997616067107077271234272699473
+316258433539818381316108677253948520717066079742130872191391026876978938301595297841729450104777515744
+329
+prime number q is16295987633597507022079035792651362708653034086451179412791395159018434039686574419084445457091309019 958011356682077762167116800690512861094823685729412493004985480695151418364557357441519382087492354812
+303281204443293129284873661565419734726397689991056674514937464946198124476058951341663906940428877098
+9747
+Public key is12535317231931615097535292679185522142398124359148578631491867555660541594908142243803236928383564409 091225485416749483849676731307292564254668876347790113
+Private key is13447068803454147250016548099154994288001205002052029380889366442542448009766902483706511629378778814 278990034496738434310061277380078992204031368701787218848258622194596869433341569244363873935384095105
+592616511001433759869739164863728336417128555891622497173940668066194911692005738411199165928696303164
+523779310027829195066723798832917749431105127613599172760980717753017355228063125668506068598724533589
+104327931657316929758777163359133663584946773520040126746860463171317362804721343414191734927496021690
+915795912693044571397754154768310721320751218537689010905006735039126790700979397990051206085125951747
+130833
+Enter the plain text:
+Hello everyone
+Encrypting string:Hello everyone
+string in bytes: 7210110810811132101118101114121111110101 Dcrypting Bytes: 7210110810811132101118101114121111110101
+Dcrypted string:Hello everyone
