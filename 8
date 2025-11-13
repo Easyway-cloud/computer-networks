@@ -1,0 +1,82 @@
+# Create Simulator
+set ns [new Simulator]
+
+# Open Trace and NAM files
+set ntrace [open prog1.tr w]
+$ns trace-all $ntrace
+
+set namfile [open prog1.nam w]
+$ns namtrace-all $namfile
+
+# Finish Procedure
+proc Finish {} {
+    global ns ntrace namfile
+
+    $ns flush-trace
+    close $ntrace
+    close $namfile
+
+    # Run NAM to visualize
+    exec nam prog1.nam &
+
+    # Count dropped packets using grep (Linux/Mac)
+    if {[catch {exec grep -c "^d" prog1.tr} result]} {
+        puts "Error running grep: $result"
+    } else {
+        puts "The number of packet drops is: $result"
+    }
+
+    exit 0
+}
+
+# Create 3 nodes
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+
+# Label nodes
+$n0 label "TCP Source"
+$n2 label "Sink"
+
+# Set link color (optional)
+$ns color 1 blue
+
+# Create duplex links between nodes
+$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+$ns duplex-link $n1 $n2 1Mb 10ms DropTail
+
+# Set link orientation for visualization
+$ns duplex-link-op $n0 $n1 orient right
+$ns duplex-link-op $n1 $n2 orient right
+
+# Set queue size limits
+$ns queue-limit $n0 $n1 10
+$ns queue-limit $n1 $n2 10
+
+# Create TCP agents and attach
+set tcp0 [new Agent/TCP]
+$ns attach-agent $n0 $tcp0
+
+set sink0 [new Agent/TCPSink]
+$ns attach-agent $n2 $sink0
+
+# Connect TCP agents
+$ns connect $tcp0 $sink0
+
+# Create CBR application over TCP
+set cbr0 [new Application/Traffic/CBR]
+$cbr0 set type_ CBR
+$cbr0 set packetSize_ 100
+$cbr0 set rate_ 1Mb
+$cbr0 set random_ false
+$cbr0 attach-agent $tcp0
+
+# Set TCP class (optional)
+$tcp0 set class_ 1
+
+# Schedule events
+$ns at 0.0 "$cbr0 start"
+$ns at 5.0 "Finish"
+
+# Run the simulation
+$ns run
