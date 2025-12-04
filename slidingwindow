@@ -1,0 +1,41 @@
+import java.util.*;
+
+public class SlidingWindow {
+
+    static final int W = 4;      // Window size
+    static final int N = 10;     // Total packets
+
+    public static void main(String[] args) {
+
+        Queue<Integer> window = new LinkedList<>();
+
+        // Send initial window packets
+        for (int i = 0; i < W && i < N; i++) {
+            window.add(i);
+            System.out.println("Sent packet: " + i);
+        }
+
+        int next = W;
+
+        while (!window.isEmpty() || next < N) {
+
+            // Receive ACK
+            if (!window.isEmpty()) {
+                int ack = window.poll();
+                System.out.println("Acknowledgment received for packet: " + ack);
+            }
+
+            // Send next packet
+            if (next < N) {
+                window.add(next);
+                System.out.println("Sent packet: " + next);
+                next++;
+            }
+
+            // Delay just for demonstration
+            try { Thread.sleep(500); } catch (Exception e) { }
+        }
+
+        System.out.println("All packets sent and acknowledged.");
+    }
+}
