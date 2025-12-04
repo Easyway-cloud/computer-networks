@@ -1,0 +1,39 @@
+import java.util.*;
+
+public class extra {
+
+    static int gp[]={1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1};
+
+    static void div(int d[],int k){
+        for(int i=0;i<k;i++)
+            if(d[i]==1)
+                for(int j=0;j<gp.length;j++)
+                    d[i+j]^=gp[j];
+    }
+
+    public static void main(String[] a){
+        Scanner sc=new Scanner(System.in);
+
+        System.out.print("Enter the length of Data Frame: ");
+        int n=sc.nextInt();
+
+        int d[]=new int[n+16], c[]=new int[n+16];
+
+        System.out.println("Enter the Message:");
+        for(int i=0;i<n;i++) d[i]=c[i]=sc.nextInt();
+
+        div(d,n);
+
+        System.out.print("Data to be transmitted: ");
+        for(int i=0;i<n+16;i++){ d[i]^=c[i]; System.out.print(d[i]+" "); }
+        System.out.println();
+
+        System.out.println("Enter the Received Data:");
+        for(int i=0;i<n+16;i++) d[i]=sc.nextInt();
+
+        div(d,n);
+
+        for(int x:d) if(x!=0){ System.out.println("ERROR in Data"); return; }
+        System.out.println("NO ERROR");
+    }
+}
