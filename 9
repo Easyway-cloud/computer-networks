@@ -1,0 +1,68 @@
+import java.math.BigInteger;
+import java.util.*;
+
+public class RSA_Short {
+
+    BigInteger p, q, N, phi, e, d;
+    int bitLength = 512;  // enough for demo
+
+    // Constructor → Generate Keys
+    public RSA_Short() {
+        Random r = new Random();
+
+        p = BigInteger.probablePrime(bitLength, r);
+        q = BigInteger.probablePrime(bitLength, r);
+
+        System.out.println("Prime p: " + p);
+        System.out.println("Prime q: " + q);
+
+        N = p.multiply(q);
+        phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+
+        e = BigInteger.probablePrime(bitLength / 2, r);
+        while (!phi.gcd(e).equals(BigInteger.ONE))
+            e = e.add(BigInteger.ONE);
+
+        System.out.println("Public Key (e): " + e);
+
+        d = e.modInverse(phi);
+        System.out.println("Private Key (d): " + d);
+    }
+
+    // Encrypt
+    public byte[] encrypt(byte[] msg) {
+        return new BigInteger(msg).modPow(e, N).toByteArray();
+    }
+
+    // Decrypt
+    public byte[] decrypt(byte[] msg) {
+        return new BigInteger(msg).modPow(d, N).toByteArray();
+    }
+
+    // Helper to show bytes
+    static String bytesToString(byte[] b) {
+        String s = "";
+        for (byte x : b) s += x;
+        return s;
+    }
+
+    // Main Program
+    public static void main(String[] args) throws Exception {
+
+        RSA_Short rsa = new RSA_Short();
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("\nEnter Plain Text: ");
+        String text = sc.nextLine();
+
+        System.out.println("\nEncrypting: " + text);
+        System.out.println("Bytes: " + bytesToString(text.getBytes()));
+
+        byte[] encrypted = rsa.encrypt(text.getBytes());
+        byte[] decrypted = rsa.decrypt(encrypted);
+
+        System.out.println("Decrypted Bytes: " + bytesToString(decrypted));
+        System.out.println("Decrypted Text: " + new String(decrypted));
+    }
+}
+ //9th
