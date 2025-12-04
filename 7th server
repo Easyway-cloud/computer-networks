@@ -1,0 +1,45 @@
+import java.io.*;
+import java.net.*;
+
+public class Server {
+
+    public static void main(String[] args) throws Exception {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.print("Enter file name: ");
+        String filename = br.readLine();
+
+        ServerSocket ss = new ServerSocket(5000);
+        System.out.println("Server started. Waiting for client...");
+
+        Socket s = ss.accept();
+        System.out.println("Client connected.");
+
+        DataInputStream din = new DataInputStream(s.getInputStream());
+        DataOutputStream dout = new DataOutputStream(s.getOutputStream());
+
+        if (din.readUTF().equals("start")) {
+
+            File file = new File(filename);
+            if (!file.exists()) {
+                dout.writeUTF("File not found");
+                return;
+            }
+            dout.writeUTF(filename);
+            dout.writeUTF(String.valueOf(file.length()));
+
+            FileInputStream fin = new FileInputStream(file);
+            byte[] buffer = new byte[1024];
+            int r;
+
+            while ((r = fin.read(buffer)) != -1)
+                dout.write(buffer, 0, r);
+
+            fin.close();
+            System.out.println("File sent.");
+        }
+
+        s.close();
+        ss.close();
+    }
+}
